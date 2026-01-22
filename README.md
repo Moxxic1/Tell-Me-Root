@@ -34,13 +34,13 @@ sudo apt install python3-pexpect
 
 ### 3. 直接运行脚本
 ```bash
-python tell_me_root.py
+python attack.py
 或
-python3 tell_me_root.py
+python3 attack.py
 或
-python tell_me_root.py 自己的ip列表文件
+python attack.py 自己的ip列表文件
 或
-python3 tell_me_root.py 自己的ip列表文件
+python3 attack.py 自己的ip列表文件
 ```
 
 ## 📋 运行示例
@@ -50,4 +50,5 @@ python3 tell_me_root.py 自己的ip列表文件
 本工具仅供内网管理和授权的渗透测试使用。 在使用本脚本前，请确保你已获得目标系统的合法访问授权。因不当使用本工具导致的任何法律纠纷或系统损坏，开发者概不负责
 
 ## 要是挖到了洞，记得给个star！谢谢！！！
+
 
